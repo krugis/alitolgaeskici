@@ -1,0 +1,3 @@
+chatbot:
+aws: bedrock + lex + connect
+https://www.youtube.com/watch?v=6s8-cPSdNGY
