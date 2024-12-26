@@ -2,3 +2,4 @@ chatbot:
 aws: bedrock + lex + connect
 https://www.youtube.com/watch?v=6s8-cPSdNGY
 https://abhishek-reddy.medium.com/comparison-of-rag-implementations-on-aws-bedrock-knowledge-bases-vs-19c2995dc12d
+https://www.youtube.com/watch?v=nSFVwraSuos
