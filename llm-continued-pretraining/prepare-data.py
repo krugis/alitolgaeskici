@@ -4,8 +4,8 @@ from pathlib import Path
 from pypdf import PdfReader
 
 # Set the directory containing PDFs
-PDF_FOLDER = "path/to/your/pdfs"  # Change this to your actual folder path
-OUTPUT_FILE = "output.jsonl"
+PDF_FOLDER = "/home/endpoint11/knowledgebase/test"  # Change this to your actual folder path
+OUTPUT_FILE = "/home/endpoint11/knowledgebase/test/output.jsonl"
 CHUNK_SIZE = 512
 EOS_TOKEN = "<|endoftext|>"  # End of text token
 
