@@ -1,43 +1,103 @@
-import os
+import fitz  # PyMuPDF
 import json
-from pathlib import Path
-from pypdf import PdfReader
+import os
+import spacy
+from rich.console import Console
+from rich.progress import Progress, BarColumn, TextColumn
 
-# Set the directory containing PDFs
-PDF_FOLDER = "/home/endpoint11/knowledgebase/test"  # Change this to your actual folder path
-OUTPUT_FILE = "/home/endpoint11/knowledgebase/test/output.jsonl"
-CHUNK_SIZE = 512
-EOS_TOKEN = "<|endoftext|>"  # End of text token
+# Load spaCy's English model
+nlp = spacy.load("en_core_web_sm")
+console = Console()
 
-def extract_text_from_pdfs(folder_path):
-    """Extracts text from all PDFs in the specified folder."""
-    all_text = []
+def split_into_chunks(text, chunk_size=256):
+    sentences = text.split('.')
+    sentences = [sentence.strip() + '.' for sentence in sentences if sentence.strip()]
+
+    chunks = []
+    current_chunk = []
+    current_chunk_word_count = 0
+
+    for sentence in sentences:
+        sentence_word_count = len(sentence.split())
+        if current_chunk_word_count + sentence_word_count > chunk_size:
+            chunks.append({"text": " ".join(current_chunk) + " <|end_of_text|>"})
+            current_chunk = [sentence]
+            current_chunk_word_count = sentence_word_count
+        else:
+            current_chunk.append(sentence)
+            current_chunk_word_count += sentence_word_count
     
-    for pdf_file in Path(folder_path).glob("*.pdf"):
-        reader = PdfReader(str(pdf_file))
-        pdf_text = ""
-        
-        for page in reader.pages:
-            pdf_text += page.extract_text() or " "  # Extract text, avoid NoneType
-        
-        all_text.append(pdf_text.strip())  # Clean extra spaces/newlines
+    if current_chunk:
+        chunks.append({"text": " ".join(current_chunk) + " <|end_of_text|>"})
+    return chunks
+
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    toc = doc.get_toc()
+    content = []
+    scope_page = history_page = None
+
+    for entry in toc:
+        level, title, page_num = entry
+        if "Scope" in title:
+            scope_page = page_num
+        elif "History" in title:
+            history_page = page_num
+
+    if not scope_page or not history_page:
+        console.print(f"[bold red]Skipping {pdf_path}: 'Scope' or 'History' not found in TOC.[/bold red]")
+        return []
     
-    return " ".join(all_text)  # Merge text from all PDFs
+    total_words = 0
+    total_chunks = 0
+    
+    for page_num in range(scope_page, history_page - 1):
+        page = doc.load_page(page_num)
+        raw_text = page.get_text("text")
+        cleaned_text = " ".join(raw_text.split("\n")[4:]).strip()
+        
+        if cleaned_text:
+            chunks = split_into_chunks(cleaned_text)
+            total_words += len(cleaned_text.split())
+            total_chunks += len(chunks)
+            content.extend(chunks)
+    
+    doc.close()
+    return content, total_words, total_chunks
 
-def chunk_text(text, chunk_size):
-    """Splits text into chunks of a given size."""
-    return [text[i:i+chunk_size] + EOS_TOKEN for i in range(0, len(text), chunk_size)]
+def process_pdfs_in_folder(folder_path, output_path, chunk_size=256):
+    pdf_files = [f for f in os.listdir(folder_path) if f.endswith(".pdf")]
+    total_files = len(pdf_files)
+    total_words = 0
+    total_chunks = 0
+    
+    with Progress(
+        TextColumn("Processing: [bold blue]{task.fields[filename]}[/bold blue]"),
+        BarColumn(),
+        TextColumn("{task.percentage:>3.0f}%"),
+        console=console
+    ) as progress:
+        task = progress.add_task("Processing PDFs", total=total_files, filename="Starting...")
+        
+        with open(output_path, 'a') as f:
+            for i, pdf_file in enumerate(pdf_files, 1):
+                pdf_path = os.path.join(folder_path, pdf_file)
+                progress.update(task, filename=pdf_file)
+                content, words, chunks = extract_text_from_pdf(pdf_path)
+                
+                for item in content:
+                    json.dump(item, f)
+                    f.write("\n")
+                
+                total_words += words
+                total_chunks += chunks
+                
+                console.print(f"[bold green]Processed:[/bold green] {pdf_file} | [cyan]Words:[/cyan] {total_words} | [magenta]Chunks:[/magenta] {total_chunks}")
+                progress.advance(task)
+    
+    console.print(f"\n[bold white on blue]Completed processing {total_files} PDFs! Total words: {total_words}, Total chunks: {total_chunks}[/bold white on blue]")
 
-def save_chunks_to_jsonl(chunks, output_file):
-    """Saves the text chunks in JSONL format."""
-    with open(output_file, "w", encoding="utf-8") as f:
-        for chunk in chunks:
-            json.dump({"text": chunk}, f, ensure_ascii=False)
-            f.write("\n")
-
-# Process PDFs
-pdf_text = extract_text_from_pdfs(PDF_FOLDER)
-text_chunks = chunk_text(pdf_text, CHUNK_SIZE)
-save_chunks_to_jsonl(text_chunks, OUTPUT_FILE)
-
-print(f"Processed {len(text_chunks)} chunks and saved to {OUTPUT_FILE}.")
+# Example usage
+pdf_folder = '/home/endpoint11/knowledgebase/etsi-test'
+output_path = '/home/endpoint11/knowledgebase/test/output.jsonl'
+process_pdfs_in_folder(pdf_folder, output_path, chunk_size=256)
