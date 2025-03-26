@@ -2,8 +2,8 @@ import json
 import re
 
 # Paths for input (raw) and output (cleaned) JSONL files
-input_jsonl = "/path/to/raw_output.jsonl"   # Change this to the actual path
-output_jsonl = "/path/to/cleaned_output.jsonl"  # Change this to the actual path
+input_jsonl = "/home/endpoint11/knowledgebase/test/output2.jsonl"   # Change this to the actual path
+output_jsonl = "/home/endpoint11/knowledgebase/test/output_clean.jsonl"  # Change this to the actual path
 
 # Define unwanted patterns (characters, whitespace issues, etc.)
 UNWANTED_PATTERNS = [
