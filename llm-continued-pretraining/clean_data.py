@@ -24,6 +24,7 @@ def clean_text(text):
     Cleans extracted text by:
     - Removing unwanted characters and whitespace issues.
     - Removing specific unwanted words or phrases.
+    - Ensuring 'end_of_text' is replaced with '<|end_of_text|>'.
 
     Args:
         text (str): The input text to be cleaned.
@@ -41,6 +42,9 @@ def clean_text(text):
     # Remove specific unwanted words/phrases
     for word in UNWANTED_WORDS:
         text = re.sub(rf"\b{word}\b", "", text, flags=re.IGNORECASE)
+
+    # Replace 'end_of_text' with '<|end_of_text|>'
+    text = text.replace("end_of_text", "<|end_of_text|>")
 
     # Trim extra spaces and return cleaned text
     return text.strip()
