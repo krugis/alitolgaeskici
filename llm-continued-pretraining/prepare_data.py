@@ -5,6 +5,11 @@ import spacy
 from rich.console import Console
 from rich.progress import Progress, BarColumn, TextColumn
 
+# Example usage
+pdf_folder = '/home/endpoint11/knowledgebase/etsi-test'
+output_path = '/home/endpoint11/knowledgebase/test/output2.jsonl'
+chunk_size = 256
+
 # Load spaCy's English model
 nlp = spacy.load("en_core_web_sm")
 console = Console()
@@ -97,7 +102,5 @@ def process_pdfs_in_folder(folder_path, output_path, chunk_size=256):
     
     console.print(f"\n[bold white on blue]Completed processing {total_files} PDFs! Total words: {total_words}, Total chunks: {total_chunks}[/bold white on blue]")
 
-# Example usage
-pdf_folder = '/home/endpoint11/knowledgebase/etsi-test'
-output_path = '/home/endpoint11/knowledgebase/test/output.jsonl'
+
 process_pdfs_in_folder(pdf_folder, output_path, chunk_size=256)
