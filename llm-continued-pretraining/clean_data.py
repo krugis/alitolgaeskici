@@ -44,7 +44,7 @@ def clean_text(text):
         text = re.sub(rf"\b{word}\b", "", text, flags=re.IGNORECASE)
 
     # Replace 'end_of_text' with '<|end_of_text|>'
-    text = text.replace("end_of_text", "<|end_of_text|>")
+    text = re.sub(r"\s*end_of_text\s*", "<|end_of_text|>", text)
 
     # Trim extra spaces and return cleaned text
     return text.strip()
