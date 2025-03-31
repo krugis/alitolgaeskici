@@ -10,7 +10,7 @@ A simple AI Chatbot with a sleek popup UI, designed using HTML, CSS, and JavaScr
 - 📱 Responsive design for desktop and mobile
 
 ## 🎥 Demo
-[Live Preview](#) *(Add link if hosted online)*
+[Live Preview](#) *(TBC)*
 
 ## 📥 Installation
 1. **Clone the repository:**
@@ -44,7 +44,7 @@ A simple AI Chatbot with a sleek popup UI, designed using HTML, CSS, and JavaScr
 ```
 
 ## 👨‍💻 Credits
-- Designed and developed by **JV Codes** ([YouTube](https://www.youtube.com/@jvcodes))
+- Update from the orginal: Designed and developed by **JV Codes** ([YouTube](https://www.youtube.com/@jvcodes))
 
 ## 📜 License
 This project is open-source and available under the [MIT License](LICENSE).
