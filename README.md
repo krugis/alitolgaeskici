@@ -80,6 +80,32 @@ The overall process is similar to pretraining but differs in data preparation. C
   - `logging_steps=1`: Logs training progress at every step.
   - `report_to="wandb"`: Uses Weights & Biases for tracking.
 
+### Evaluation
+
+The trained model is evaluated in comparison to the base model using **Loss, Perplexity, BLEU, ROUGE, and Embedding Similarity**.
+
+#### **Evaluation Process:**
+- The **evaluation dataset size** is controlled by `eval_data_size` (default: `10`).
+- The **base model** (`unsloth/Llama-3.2-1B-Instruct-unsloth-bnb-4bit`) is evaluated before applying LoRA adapters.
+- The **fine-tuned model** is evaluated after applying LoRA adapters.
+- A progress bar tracks evaluation steps.
+- **Metrics calculated:**
+  - **Loss:** Average token loss over the dataset.
+  - **Perplexity:** Exponential of the loss, lower is better.
+  - **BLEU Score:** Measures text similarity based on n-gram matches.
+  - **ROUGE Score:** Measures recall-oriented overlap with reference texts.
+  - **Embedding Similarity:** Cosine similarity between generated and reference embeddings.
+- **Model weight changes** are also tracked to determine the percentage of altered weights in fine-tuning.
+
+#### **Results Display:**
+- A **rich table** presents evaluation metrics for both models.
+- A **bar chart** visualizes model performance differences.
+- Evaluation results are saved in `model_comparison.png`.
+  ![image](https://github.com/user-attachments/assets/399746d2-ef20-4180-ada0-4218f25637a8)
+  ![image](https://github.com/user-attachments/assets/26688baa-092d-4601-aa8d-f4845e5f6ac1)
+
+
+
 ## Training logs
 ![image](https://github.com/user-attachments/assets/85624d83-b50e-4f40-bcd5-503920308878)
 ![image](https://github.com/user-attachments/assets/df27ac43-4663-4866-b329-0386db024452)
